@@ -46,3 +46,20 @@ def login():
             return render_template("home.html")
         else:
             return render_template("error.html", message="Invalid Username or Password")
+
+@app.route("/search", methods=["POST"])
+def search():
+    search_text = request.form.get("search_text")
+    res = db.execute("SELECT title FROM books WHERE title=:title",{"title": search_text}).fetchall()
+    if res is not None:
+        return render_template("results.html", titles = res)
+    else:
+        res = db.execute("SELECT title FROM books WHERE isbn=:isbn",{"isbn": search_text}).fetchall()
+        if res is not None:
+            return render_template("results.html", titles = res)
+        else:
+            res = db.execute("SELECT title from books WHERE author=:author",{"author": search_text}) .fetchall()
+            if res is not None:
+                return render_template("results.html", titles = res)
+            else:
+                return render_template("error.html", message = "No match found")
